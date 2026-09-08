@@ -16,4 +16,4 @@ https://mraanderson.github.io/floppy-wiki/floppy-wiki2.html - the next level...
 ----
 The Matrix adventure
 
-https://mraanderson.github.io/floppy-wiki/floppy-wiki-matrix.htm
+https://mraanderson.github.io/floppy-wiki/floppy-wiki-matrix.html
