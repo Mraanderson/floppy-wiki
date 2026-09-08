@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Floppy Disk Wiki - Matrix Edition</title>
+    <style>
+        body {
+            font-family: "Courier New", Courier, monospace;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: #000000;
+            color: #00ff00;
+        }
+        #sidebar {
+            width: 240px;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            box-sizing: border-box;
+            background: #050505;
+            border-right: 1px dashed #00ff00;
+        }
+        #page-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        #page-list li {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px dashed #003300;
+        }
+        #page-list li.active, #page-list li:hover {
+            background: #00ff00;
+            color: #000000;
+            font-weight: bold;
+        }
+        #content {
+            flex-grow: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: #000000;
+        }
+        textarea, input[type="text"] {
+            background: #000000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        textarea {
+            width: 100%;
+            flex-grow: 1;
+            margin: 15px 0;
+            font-size: 1rem;
+        }
+        input[type="text"] {
+            width: 100%;
+            font-size: 1.2rem;
+        }
+        button {
+            padding: 10px 15px;
+            border: 1px solid #00ff00;
+            font-weight: bold;
+            cursor: pointer;
+            background: #000000;
+            color: #00ff00;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-family: inherit;
+        }
+        button:hover {
+            background: #003300;
+        }
+        button.danger {
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+        button.danger:hover {
+            background: #330000;
+        }
+        .hidden { display: none !important; }
+        #page-text { line-height: 1.6; margin-top: 10px; flex-grow: 1; }
+        #page-text h1, #page-text h2, #page-text h3 { margin-top: 20px; margin-bottom: 10px; color: #ffffff; text-shadow: 0 0 4px #00ff00; }
+        #page-text ul { padding-left: 20px; margin: 10px 0; }
+        #page-text p { margin: 10px 0; }
+        a { color: #ffffff; text-decoration: underline; cursor: pointer; font-weight: bold; text-shadow: 0 0 4px #00ff00; }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3>ðŸ’¾ Floppy Wiki</h3>
+        <ul id="page-list"><li>Another Page</li><li>Home</li><li class="active">Knock knock Neo...</li></ul>
+        <button onclick="newPage()">+ New Page</button>
+        <br>
+        <button onclick="downloadWiki()">ðŸ’¾ Save to Floppy</button>
+    </div>
+    <div id="content">
+        <div id="view-mode" class="">
+            <h1 id="page-title">Knock knock Neo...</h1>
+            <div id="page-text"><p>Follow the <strong>white</strong> rabit.</p></div>
+            <div style="margin-top:20px;">
+                <button onclick="editMode()">Edit</button>
+                <button id="del-btn" class="danger" onclick="deletePage()" style="display: inline;">Delete</button>
+            </div>
+        </div>
+        <div id="edit-mode" class="hidden">
+            <input type="text" id="edit-title" placeholder="Page Title">
+            <textarea id="edit-text" placeholder="Write markdown content... Link pages using [[Page Name]]" style="height: 363px; width: 1242px;"></textarea>
+            <div>
+                <button onclick="savePage()">Save</button>
+                <button onclick="cancelEdit()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*DATA_START*/
+        let data = {
+    "Home": "# Welcome to your Floppy Wiki!\n\nThis single-file wiki is completely optimized for a **1.44 MB floppy disk**.\n\n### Markdown Syntax Rules:\n* Use double asterisks for **bold text**\n* Use single asterisks for *italics*\n* Use headers like `# Header 1` or `### Header 3`\n* Link pages automatically using [[Another Page]]\n\n### How to commit changes permanently:\n1. Click **ðŸ’¾ Save to Floppy** in the sidebar.\n2. Overwrite the file on your `A:\\` drive.",
+    "Another Page": "# Connected Page\n\nThis page was loaded instantly from internal data storage.\n\nYou can click here to hop back to the [[Home]] view.",
+    "Wake up, Neo...": "Follow the **white** rabbit.\n\nKnock knock..."
+};
+        /*DATA_END*/
+
+        let current = "Home";
+
+        function parseMarkdown(text) {
+            let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            html = html.replace(/\[\[([^\]]+)\]\]/g, (m, g) => `<a onclick="showPage('${g.trim()}')">${g.trim()}</a>`);
+
+            let lines = html.split('\n');
+            let result = [];
+            let inList = false;
+
+            lines.forEach(line => {
+                if (line.startsWith('# ')) {
+                    if (inList) { result.push('</ul>'); inList = false; }
+                    result.push(`<h1>${line.substring(2)}</h1>`);
+                } else if (line.startsWith('## ')) {
+                    if (inList) { result.push('</ul>'); inList = false; }
+                    result.push(`<h2>${line.substring(3)}</h2>`);
+                } else if (line.startsWith('### ')) {
+                    if (inList) { result.push('</ul>'); inList = false; }
+                    result.push(`<h3>${line.substring(4)}</h3>`);
+                } else if (line.startsWith('* ') || line.startsWith('- ')) {
+                    if (!inList) { result.push('<ul>'); inList = true; }
+                    result.push(`<li>${applyInlineMarkdown(line.substring(2))}</li>`);
+                } else {
+                    if (inList) { result.push('</ul>'); inList = false; }
+                    if (line.trim() === '') {
+                        result.push('<br>');
+                    } else {
+                        result.push(`<p>${applyInlineMarkdown(line)}</p>`);
+                    }
+                }
+            });
+            if (inList) result.push('</ul>');
+            return result.join('\n');
+        }
+
+        function applyInlineMarkdown(txt) {
+            txt = txt.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            return txt.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        }
+
+        function renderList() {
+            const list = document.getElementById('page-list');
+            list.innerHTML = '';
+            Object.keys(data).sort().forEach(p => {
+                const li = document.createElement('li');
+                li.textContent = p;
+                if(p === current) li.className = 'active';
+                li.onclick = () => showPage(p);
+                list.appendChild(li);
+            });
+        }
+
+        function showPage(p) {
+            current = p;
+            renderList();
+            document.getElementById('view-mode').className = '';
+            document.getElementById('edit-mode').className = 'hidden';
+            document.getElementById('page-title').textContent = p;
+            document.getElementById('page-text').innerHTML = parseMarkdown(data[p] || "This page is empty.");
+            document.getElementById('del-btn').style.display = (p === "Home") ? "none" : "inline";
+        }
+
+        function editMode() {
+            document.getElementById('view-mode').className = 'hidden';
+            document.getElementById('edit-mode').className = '';
+            document.getElementById('edit-title').value = current;
+            document.getElementById('edit-title').disabled = (current === "Home");
+            document.getElementById('edit-text').value = data[current] || "";
+        }
+
+        function cancelEdit() { showPage(current); }
+
+        function savePage() {
+            let t = document.getElementById('edit-title').value.trim();
+            if(!t) return alert("Title required");
+            if(current !== t && current !== "") delete data[current];
+            data[t] = document.getElementById('edit-text').value;
+            current = t;
+            showPage(t);
+        }
+
+        function newPage() {
+            current = "";
+            document.getElementById('view-mode').className = 'hidden';
+            document.getElementById('edit-mode').className = '';
+            document.getElementById('edit-title').value = "";
+            document.getElementById('edit-title').disabled = false;
+            document.getElementById('edit-text').value = "";
+        }
+
+        function deletePage() {
+            if(current === "Home" || !confirm("Delete this page?")) return;
+            delete data[current];
+            showPage("Home");
+        }
+
+        function downloadWiki() {
+            // 1. Clone the current DOM to avoid modifying the live view
+            const docClone = document.documentElement.cloneNode(true);
+
+            // 2. Find the script tag containing our data in the clone
+            const scripts = docClone.querySelectorAll('script');
+            let targetScript = null;
+
+            for (let script of scripts) {
+                if (script.textContent.includes('/*DATA_START*/')) {
+                    targetScript = script;
+                    break;
+                }
+            }
+
+            if (!targetScript) {
+                alert("Could not find data block in script.");
+                return;
+            }
+
+            // 3. Update the data string inside the cloned script text
+            const dataStr = JSON.stringify(data, null, 4);
+            let scriptContent = targetScript.textContent;
+
+            // Regex to find the data block between the markers
+            const regex = /(\/\*DATA_START\*\/[\s\S]*?let data = )([\s\S]*?)(\;\s*\/\*DATA_END\*\/)/;
+
+            if (regex.test(scriptContent)) {
+                scriptContent = scriptContent.replace(regex, `$1${dataStr}$3`);
+                targetScript.textContent = scriptContent;
+            } else {
+                alert("Regex failed to match data block. File structure might be corrupted.");
+                return;
+            }
+
+            // 4. Reconstruct the full HTML string
+            let fullHTML = "<!DOCTYPE html>\n" + docClone.outerHTML;
+
+            // 5. Force download
+            const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "floppy-wiki.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        window.onload = () => showPage("Home");
+    </script>
+
+
+</body></html>
