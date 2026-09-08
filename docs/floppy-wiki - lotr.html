@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floppy Disk Wiki - Lord Of The Rings Edition</title>
+    <style>
+       * { box-sizing: border-box; }
+body {
+    font-family: "Courier New", Courier, monospace;
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    background: #1b1a17; /* deep earth */
+    color: #e8d9b5;      /* parchment text */
+}
+
+#sidebar {
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    background: #2a261f; /* dark wood */
+    border-right: 1px solid #a38f5a; /* elvish gold */
+    flex-shrink: 0;
+}
+
+#page-list {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+#page-list li {
+    padding: 12px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #4b4536; /* subtle stone */
+}
+
+#page-list li.active,
+#page-list li:hover {
+    background: #a38f5a; /* gold highlight */
+    color: #1b1a17;      /* dark text */
+    font-weight: bold;
+}
+
+#content {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    background: #1b1a17;
+}
+
+#view-mode, #edit-mode {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+textarea, input[type="text"] {
+    background: #1b1a17;
+    color: #e8d9b5;
+    border: 1px solid #a38f5a;
+    padding: 10px;
+    font-family: inherit;
+}
+
+textarea {
+    width: 100%;
+    flex-grow: 1;
+    min-height: 250px;
+    margin: 15px 0;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+input[type="text"] {
+    width: 100%;
+    font-size: 1.2rem;
+}
+
+button {
+    padding: 12px 15px;
+    border: 1px solid #a38f5a;
+    font-weight: bold;
+    cursor: pointer;
+    background: #2a261f;
+    color: #e8d9b5;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    font-family: inherit;
+}
+
+button:hover {
+    background: #4b4536;
+}
+
+button.danger {
+    border-color: #b33a3a;
+    color: #b33a3a;
+}
+
+button.danger:hover {
+    background: #3a1f1f;
+}
+
+.hidden { display: none !important; }
+
+#page-text {
+    line-height: 1.6;
+    margin-top: 10px;
+    flex-grow: 1;
+}
+
+#page-text h1, #page-text h2, #page-text h3, #page-text h4, #page-text h5 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #f5e6c8; /* brighter parchment */
+    text-shadow: 0 0 4px #a38f5a; /* soft gold glow */
+}
+
+#page-text ul, #page-text ol {
+    padding-left: 25px;
+    margin: 10px 0;
+}
+
+#page-text p {
+    margin: 10px 0;
+}
+
+#page-text pre {
+    background: #2a261f;
+    border: 1px solid #a38f5a;
+    padding: 10px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+
+#page-text code {
+    font-family: inherit;
+    color: #d8c48b; /* soft gold */
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #a38f5a;
+    margin: 20px 0;
+}
+
+a {
+    color: #f5e6c8;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: bold;
+    text-shadow: 0 0 4px #a38f5a;
+}
+
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3> Floppy Wiki... ...F5 to reset</h3>
+        <ul id="page-list"></ul>
+        <button onclick="newPage()">+ New Page</button>
+        <button onclick="downloadWiki()"> Save to Floppy</button>
+    </div>
+    <div id="content">
+        <div id="view-mode" class="">
+            <h1 id="page-title"></h1>
+            <div id="page-text"><h1></h1>
+<ul>
+</ul>
+<br></div>
+            <div style="margin-top:20px;">
+                <button onclick="editMode()">Edit</button>
+                <button id="del-btn" class="danger" onclick="deletePage()" style="display: inline;">Delete</button>
+            </div>
+        </div>
+        <div id="edit-mode" class="hidden">
+            <input type="text" id="edit-title" placeholder="Page Title">
+            <textarea id="edit-text" placeholder="====== Header 1 ======\n===== Header 2 =====\n\n* Bullet item\n  * Nested bullet\n\n----\n\n[[Link|Display Text]]\n\n```\ncode block\n```"></textarea>
+            <div>
+                <button onclick="savePage()">Save</button>
+                <button onclick="cancelEdit()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+/*DATA_START*/
+let data = {
+    "Home": "====== THE SHIRE ======\n\nYou sit beside a warm hearth.\nA sealed envelope lies on the table.\nGandalf's handwriting marks it.\nA faint unease stirs in your chest.\n\nChoose:\n  * [[Open The Letter]]\n  * [[Ignore The Letter]]\n",
+    "Open The Letter": "====== THE WARNING ======\n\nThe letter speaks of a Ring.\nAncient. Dangerous.\nGandalf urges you to leave at once.\nFootsteps approach outside.\n\nChoose:\n  * [[Flee Into The Night]]\n  * [[Wait For Gandalf]]\n",
+    "Ignore The Letter": "====== COMFORT ======\n\nYou return to your tea.\nThe world remains small and peaceful.\nBut danger grows beyond your borders.\n\n===== ENDING =====\nBLISSFUL OBLIVIOUSNESS\n",
+    "Flee Into The Night": "====== HOBBITON ROAD ======\n\nThe moon is pale.\nA distant rider approaches.\nIts breath rasps.\nIts presence chills the air.\n\nChoose:\n  * [[Hide Beneath The Roots]]\n  * [[Run Toward Bree]]\n",
+    "Wait For Gandalf": "====== SHADOWS ======\n\nA knock at the door.\nNot Gandalf.\nA tall, hooded figure enters.\nIts voice is a hiss.\n\n===== ENDING =====\nTAKEN BY THE RINGWRAITH\n",
+    "Hide Beneath The Roots": "====== ROOTS OF SAFETY ======\n\nYou press yourself into the earth.\nThe rider pauses above.\nIt sniffs the air.\nThen moves on.\n\nChoose:\n  * [[Travel With Friends]]\n  * [[Continue Alone]]\n",
+    "Run Toward Bree": "====== BREE GATES ======\n\nRain pours.\nYou reach the Prancing Pony.\nA hooded man watches you.\nHis eyes are sharp.\n\nChoose:\n  * [[Speak To The Ranger]]\n  * [[Avoid Him]]\n",
+    "Travel With Friends": "====== FELLOWSHIP BEGINS ======\n\nSam, Merry, and Pippin join you.\nTheir courage steadies your heart.\nBut danger follows.\n\nChoose:\n  * [[Head To Bree]]\n",
+    "Continue Alone": "====== LONELY PATH ======\n\nThe world grows darker.\nYour courage falters.\nA rider finds you.\n\n===== ENDING =====\nSHADOW CLAIMED\n",
+    "Head To Bree": "====== PRANCING PONY ======\n\nThe inn is lively.\nA ranger named Strider approaches.\nHe knows of the Ring.\nHe offers protection.\n\nChoose:\n  * [[Trust Strider]]\n  * [[Refuse His Help]]\n",
+    "Speak To The Ranger": "====== STRIDER ======\n\nHe warns of pursuit.\nHe knows the wild.\nHe offers guidance.\n\nChoose:\n  * [[Trust Strider]]\n",
+    "Avoid Him": "====== UNWISE CHOICE ======\n\nYou hide in a corner.\nA Ringwraith enters.\nIts shriek freezes your blood.\n\n===== ENDING =====\nFOUND BY THE NINE\n",
+    "Trust Strider": "====== WEATHERTOP ======\n\nYou camp beneath ancient ruins.\nThe night is still.\nThen fire.\nShrieks.\nThe Ringwraiths attack.\n\nChoose:\n  * [[Stand Your Ground]]\n  * [[Use The Ring]]\n",
+    "Refuse His Help": "====== ALONE IN THE WILD ======\n\nYou leave Bree.\nThe night grows cold.\nShapes move in the dark.\n\n===== ENDING =====\nOVERWHELMED\n",
+    "Stand Your Ground": "====== COURAGE ======\n\nStrider fights fiercely.\nYou hold your ground.\nThe Wraiths retreat.\nBut you are wounded.\n\nChoose:\n  * [[Seek Rivendell]]\n",
+    "Use The Ring": "====== TEMPTATION ======\n\nYou slip on the Ring.\nThe world shifts.\nThe Wraiths see you clearly.\nThey strike.\n\n===== ENDING =====\nCORRUPTED\n",
+    "Seek Rivendell": "====== RIVENDELL ======\n\nElrond heals your wounds.\nA council gathers.\nThe fate of Middle‑earth rests on a choice.\n\nChoose:\n  * [[Join The Fellowship]]\n  * [[Leave The Ring Behind]]\n",
+    "Leave The Ring Behind": "====== ABDICATION ======\n\nYou refuse the burden.\nAnother takes it.\nThe world darkens.\n\n===== ENDING =====\nDOOMED AGE\n",
+    "Join The Fellowship": "====== THE FELLOWSHIP ======\n\nNine companions.\nOne purpose.\nYou set out toward the mountains.\nSnow falls heavily.\n\nChoose:\n  * [[Cross Caradhras]]\n  * [[Enter Moria]]\n",
+    "Cross Caradhras": "====== THE RED HORN PASS ======\n\nStorms batter the mountain.\nThe path becomes deadly.\nA dark will opposes you.\n\n===== ENDING =====\nTURNED BACK BY THE MOUNTAIN\n",
+    "Enter Moria": "====== MORIA ======\n\nDark halls.\nEchoes of ancient battles.\nSomething stirs in the deep.\n\nChoose:\n  * [[Explore The Halls]]\n  * [[Head For The Bridge]]\n",
+    "Explore The Halls": "====== THE TOMB ======\n\nYou find Balin's tomb.\nDrums begin to beat.\nThe enemy approaches.\n\nChoose:\n  * [[Head For The Bridge]]\n",
+    "Head For The Bridge": "====== BRIDGE OF KHAZAD‑DÛM ======\n\nA shadow and flame rises.\nThe Balrog.\nGandalf stands against it.\n\nChoose:\n  * [[Flee To Safety]]\n",
+    "Flee To Safety": "====== LOSS ======\n\nGandalf falls.\nThe Fellowship escapes.\nYour heart breaks.\n\nChoose:\n  * [[Continue To Lothlorien]]\n",
+    "Continue To Lothlorien": "====== LOTHLORIEN ======\n\nGaladriel greets you.\nShe shows you visions.\nYour path diverges.\n\nChoose:\n  * [[Go With Aragorn]]\n  * [[Go With Frodo]]\n",
+    "Go With Aragorn": "====== HUNTERS ======\n\nYou chase the enemy across plains.\nWar looms.\nYour courage grows.\n\n===== ENDING =====\nTHE AGE OF MEN\n",
+    "Go With Frodo": "====== FINAL PATH ======\n\nYou cross into Mordor.\nAsh falls.\nThe Ring grows heavier.\n\nChoose:\n  * [[Climb Mount Doom]]\n  * [[Succumb To The Ring]]\n",
+    "Climb Mount Doom": "====== THE CRATER ======\n\nFire roars.\nYou stand at the edge.\nThe Ring pulses.\n\nChoose:\n  * [[Destroy The Ring]]\n  * [[Claim The Ring]]\n",
+    "Succumb To The Ring": "====== SHADOW KING ======\n\nThe Ring takes you.\nDarkness spreads.\n\n===== ENDING =====\nSHADOW REIGNS\n",
+    "Destroy The Ring": "====== DAWN ======\n\nThe Ring melts.\nSauron falls.\nMiddle‑earth is free.\n\n===== ENDING =====\nVICTORY\n",
+    "Claim The Ring": "====== BETRAYAL ======\n\nPower consumes you.\nThe world burns.\n\n===== ENDING =====\nTHE NEW DARK LORD\n"
+};
+/*DATA_END*/
+
+        let current = "Home";
+
+        function parseMarkdown(text) {
+            let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            html = html.replace(/```([\s\S]*?)```/g, (m, code) => `<pre><code>${code.trim()}</code></pre>`);
+            html = html.replace(/<code>([\s\S]*?)<\/code>/g, (m, code) => `<pre><code>${code.trim()}</code></pre>`);
+            html = html.replace(/\[\[([^\|\]]+)(?:\|([^\]]+))?\]\]/g, (m, target, label) => {
+                let page = target.trim();
+                let display = label ? label.trim() : page;
+                let safepage = page.replace(/'/g, "\\'"); //Escapes single quotesfor the initial JS
+                return `<a onclick="showPage('${page}')">${display}</a>`;
+            });
+
+            let lines = html.split('\n');
+            let result = [];
+            let listStack = [];
+            let inCode = false;
+
+            lines.forEach(line => {
+                if (line.includes('<pre>') && !line.includes('</pre>')) { inCode = true; result.push(line); return; }
+                if (inCode) { result.push(line); if (line.includes('</pre>')) inCode = false; return; }
+
+                let trimmed = line.trim();
+
+                if (/^----+$/.test(trimmed)) {
+                    closeAllLists(listStack, result);
+                    result.push('<hr>');
+                    return;
+                }
+
+                let headerMatch = line.match(/^(={2,6})\s*(.*?)\s*\1$/);
+                if (headerMatch) {
+                    closeAllLists(listStack, result);
+                    let depth = headerMatch[1].length;
+                    let level = 7 - depth;
+                    if (level < 1) level = 1;
+                    if (level > 6) level = 6;
+                    result.push(`<h${level}>${headerMatch[2]}</h${level}>`);
+                    return;
+                }
+
+                if (/^\s{2,}[^\*\-\s]/.test(line) && !trimmed.startsWith('*') && !trimmed.startsWith('-')) {
+                    closeAllLists(listStack, result);
+                    result.push(`<pre><code>${line.substring(2)}</code></pre>`);
+                    return;
+                }
+
+                let listMatch = line.match(/^(\s+)([\*\-])\s+(.*)$/);
+                if (listMatch) {
+                    let indent = listMatch[1].length;
+                    let type = listMatch[2] === '*' ? 'ul' : 'ol';
+                    let content = applyInlineFormatting(listMatch[3]);
+                    adjustListDepth(indent, type, listStack, result);
+                    result.push(`<li>${content}</li>`);
+                    return;
+                } else {
+                    closeAllLists(listStack, result);
+                }
+
+                if (trimmed === '') {
+                    result.push('<br>');
+                } else {
+                    result.push(`<p>${applyInlineFormatting(line)}</p>`);
+                }
+            });
+
+            closeAllLists(listStack, result);
+            return result.join('\n');
+        }
+
+        function adjustListDepth(indent, type, stack, result) {
+            while (stack.length > 0 && stack[stack.length - 1].indent > indent) {
+                let top = stack.pop();
+                result.push(`</${top.type}>`);
+            }
+            if (stack.length === 0 || stack[stack.length - 1].indent < indent) {
+                stack.push({ indent: indent, type: type });
+                result.push(`<${type}>`);
+            } else if (stack[stack.length - 1].type !== type) {
+                result.push(`</${stack.pop().type}>`);
+                stack.push({ indent: indent, type: type });
+                result.push(`<${type}>`);
+            }
+        }
+
+        function closeAllLists(stack, result) {
+            while (stack.length > 0) {
+                result.push(`</${stack.pop().type}>`);
+            }
+        }
+
+        function applyInlineFormatting(txt) {
+            txt = txt.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            txt = txt.replace(/\/\/([^\/]+)\/\//g, '<em>$1</em>');
+            txt = txt.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            txt = txt.replace(/''([^']+)''/g, '<code>$1</code>');
+            return txt;
+        }
+
+        function renderList() {
+            const list = document.getElementById('page-list');
+            list.innerHTML = '';
+            Object.keys(data).sort().forEach(p => {
+                const li = document.createElement('li');
+                li.textContent = p;
+                if(p === current) li.className = 'active';
+                li.onclick = () => showPage(p);
+                list.appendChild(li);
+            });
+        }
+
+        function showPage(p) {
+            current = p;
+            renderList();
+            document.getElementById('view-mode').className = '';
+            document.getElementById('edit-mode').className = 'hidden';
+            document.getElementById('page-title').textContent = p;
+            document.getElementById('page-text').innerHTML = parseMarkdown(data[p] || "This page is empty.");
+            document.getElementById('del-btn').style.display = (p === "Home") ? "none" : "inline";
+        }
+
+        function editMode() {
+            document.getElementById('view-mode').className = 'hidden';
+            document.getElementById('edit-mode').className = '';
+            document.getElementById('edit-title').value = current;
+            document.getElementById('edit-title').disabled = (current === "Home");
+            document.getElementById('edit-text').value = data[current] || "";
+        }
+
+        function cancelEdit() { showPage(current); }
+
+        function savePage() {
+            let t = document.getElementById('edit-title').value.trim();
+            if(!t) return alert("Title required");
+            if(current !== t && current !== "") delete data[current];
+            data[t] = document.getElementById('edit-text').value;
+            current = t;
+            showPage(t);
+        }
+
+        function newPage() {
+            current = "";
+            document.getElementById('view-mode').className = 'hidden';
+            document.getElementById('edit-mode').className = '';
+            document.getElementById('edit-title').value = "";
+            document.getElementById('edit-title').disabled = false;
+            document.getElementById('edit-text').value = "";
+        }
+
+        function deletePage() {
+            if(current === "Home" || !confirm("Delete this page?")) return;
+            delete data[current];
+            showPage("Home");
+        }
+
+        function downloadWiki() {
+            const docClone = document.documentElement.cloneNode(true);
+            const scripts = docClone.querySelectorAll('script');
+            let targetScript = null;
+
+            for (let script of scripts) {
+                if (script.textContent.includes('/*DATA_START*/')) {
+                    targetScript = script;
+                    break;
+                }
+            }
+
+            if (!targetScript) return alert("Error finding data block.");
+
+            const dataStr = JSON.stringify(data, null, 4);
+            let scriptContent = targetScript.textContent;
+            const regex = /(\/\*DATA_START\*\/[\s\S]*?let data = )([\s\S]*?)(\;\s*\/\*DATA_END\*\/)/;
+
+            if (regex.test(scriptContent)) {
+                scriptContent = scriptContent.replace(regex, `$1${dataStr}$3`);
+                targetScript.textContent = scriptContent;
+            } else {
+                return alert("Save failed.");
+            }
+
+            let fullHTML = "<!DOCTYPE html>\n" + docClone.outerHTML;
+            const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "floppy-wiki.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        window.onload = () => showPage("Home");
+    </script>
+
+</body></html>
