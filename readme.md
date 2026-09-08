@@ -5,3 +5,6 @@ Use the previous files as previous versions of Dave points.
 Simple formatting and page linking via [[Square brackets]].
 
 No image upload yet.
+
+https://mraanderson.github.io/floppy-wiki/floppy-wiki.html
+https://mraanderson.github.io/floppy-wiki/floppy-wiki2.html - the next level...
