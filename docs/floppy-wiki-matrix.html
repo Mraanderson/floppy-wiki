@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floppy Disk Wiki - Matrix Edition</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Courier New", Courier, monospace;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: #000000;
+            color: #00ff00;
+        }
+        #sidebar {
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background: #050505;
+            border-right: 1px dashed #00ff00;
+            flex-shrink: 0;
+        }
+        #page-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        #page-list li {
+            padding: 12px 10px;
+            cursor: pointer;
+            border-bottom: 1px dashed #003300;
+        }
+        #page-list li.active, #page-list li:hover {
+            background: #00ff00;
+            color: #000000;
+            font-weight: bold;
+        }
+        #content {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: #000000;
+        }
+        #view-mode, #edit-mode {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        textarea, input[type="text"] {
+            background: #000000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            font-family: inherit;
+        }
+        textarea {
+            width: 100%;
+            flex-grow: 1;
+            min-height: 250px;
+            margin: 15px 0;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        input[type="text"] {
+            width: 100%;
+            font-size: 1.2rem;
+        }
+        button {
+            padding: 12px 15px;
+            border: 1px solid #00ff00;
+            font-weight: bold;
+            cursor: pointer;
+            background: #000000;
+            color: #00ff00;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-family: inherit;
+        }
+        button:hover { background: #003300; }
+        button.danger { border-color: #ff0000; color: #ff0000; }
+        button.danger:hover { background: #330000; }
+        .hidden { display: none !important; }
+        #page-text { line-height: 1.6; margin-top: 10px; flex-grow: 1; }
+        #page-text h1, #page-text h2, #page-text h3, #page-text h4, #page-text h5 {
+            margin-top: 20px; margin-bottom: 10px; color: #ffffff; text-shadow: 0 0 4px #00ff00;
+        }
+        #page-text ul, #page-text ol { padding-left: 25px; margin: 10px 0; }
+        #page-text p { margin: 10px 0; }
+        #page-text pre {
+            background: #051505;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        #page-text code { font-family: inherit; color: #aaffaa; }
+        hr { border: 0; border-top: 1px dashed #00ff00; margin: 20px 0; }
+        a { color: #ffffff; text-decoration: underline; cursor: pointer; font-weight: bold; text-shadow: 0 0 4px #00ff00; }
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; min-height: 100vh; }
+            #sidebar { width: 100%; border-right: none; border-bottom: 1px dashed #00ff00; max-height: 250px; }
+            #content { padding: 15px; }
+            textarea { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3> Floppy Wiki</h3>
+        <ul id="page-list"><li>Agent Encounter</li><li>Agent Smith</li><li>Answer The Phone</li><li>Become The Architect</li><li>Board The Train</li><li>Enter The Car</li><li>Enter The Oracle's Path</li><li>Escape Across The Rooftops</li><li>Fight</li><li>Fight Smith</li><li>Hack Reality</li><li>Hacking Simulation</li><li>Home</li><li>Ignore The Phone</li><li>Jump To The Train Station</li><li>Machine City</li><li>Martial Arts Program</li><li>Reach The Source</li><li>Refuse The Truth</li><li>Restart The Matrix</li><li>Retreat</li><li>Return To The Matrix</li><li>Run</li><li>Save Humanity</li><li>Stay Behind</li><li>Take The Blue Pill</li><li>Take The Leap</li><li>Take The Red Pill</li><li>The Construct</li><li>The Oracle</li><li>Wait For The Visitors</li><li class="active">Weapons Training</li></ul>
+        <button onclick="newPage()">+ New Page</button>
+        <button onclick="downloadWiki()"> Save to Floppy</button>
+    </div>
+    <div id="content">
+        <div id="view-mode" class="">
+            <h1 id="page-title">Weapons Training</h1>
+            <div id="page-text"><h1>WEAPONS TRAINING</h1>
+<br>
+<p>Rows of impossible weapons appear.</p>
+<p>Hours become months of training.</p>
+<p>You are ready.</p>
+<br>
+<p>Choose:</p>
+<ul>
+<li><a onclick="showPage('Agent Encounter')">Agent Encounter</a></li>
+</ul>
+<br></div>
+            <div style="margin-top:20px;">
+                <button onclick="editMode()">Edit</button>
+                <button id="del-btn" class="danger" onclick="deletePage()" style="display: inline;">Delete</button>
+            </div>
+        </div>
+        <div id="edit-mode" class="hidden">
+            <input type="text" id="edit-title" placeholder="Page Title">
+            <textarea id="edit-text" placeholder="====== Header 1 ======\n===== Header 2 =====\n\n* Bullet item\n  * Nested bullet\n\n----\n\n[[Link|Display Text]]\n\n```\ncode block\n```"></textarea>
+            <div>
+                <button onclick="savePage()">Save</button>
+                <button onclick="cancelEdit()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+/*DATA_START*/
+let data = {
+    "Home": "====== AWAKENING ======\n\nYou wake in a dark apartment.\nRain taps against the window.\nAn old computer monitor flickers to life.\nA message appears:\n  \"Wake up.\"\nThe screen changes.\n  \"The Matrix has you.\"\nA telephone begins ringing.\nChoose:\n  * [[Answer The Phone]]\n  * [[Ignore The Phone]]\n",
+    "Answer The Phone": "====== THE CALL ======\n\nYou answer.\nA calm voice speaks.\n \"Follow my instructions exactly.\"\nYou hear footsteps outside your apartment.\nThe voice says:\n\"They've found you.\"\n\nChoose:\n  * [[Escape Across The Rooftops]]\n  * [[Wait For The Visitors]]\n",
+    "Ignore The Phone": "====== COMPLIANCE ======\n\nYou ignore the telephone.\nThe monitor shuts down.\nLife continues normally.\nOr at least it appears to.\n\n===== ENDING =====\nBLUE PILL\nYou never discover the truth.\n",
+    "Escape Across The Rooftops": "====== ROOFTOPS ======\n\nCold rain falls.\nAgents emerge from the stairwell.\nA narrow gap separates two buildings.\n\nChoose:\n  * [[Take The Leap]]\n  * [[Retreat]]\n",
+    "Take The Leap": "====== IMPOSSIBLE ======\n\nYou jump.\nFor a moment gravity seems optional.\nYou land safely.\nA black car waits below.\n\nChoose:\n  * [[Enter The Car]]\n",
+    "Retreat": "====== CAPTURED ======\n\nYou hesitate.\nThe Agents surround you.\nThe world goes dark.\n\n===== ENDING =====\n\nSYSTEM FAILURE\n",
+    "Wait For The Visitors": "====== VISITORS ======\n\nThree figures enter.\nOne removes his sunglasses.\n\"My name is Morpheus.\"\nHe offers two pills.\n\nChoose:\n  * [[Take The Red Pill]]\n  * [[Take The Blue Pill]]\n",
+    "Enter The Car": "====== MORPHEUS ======\n\nInside sits Morpheus.\nHe studies you carefully.\n\"Everything you know is a lie.\"\nHe offers two pills.\n\nChoose:\n  * [[Take The Red Pill]]\n  * [[Take The Blue Pill]]\n",
+    "Take The Blue Pill": "====== BLUE PILL ======\n\nYou wake up in your own bed.\nThe adventure is forgotten.\nReality continues unchanged.\n\n===== ENDING =====\n\nCOMFORTABLE IGNORANCE\n",
+    "Take The Red Pill": "====== RED PILL ======\n\nReality cracks apart.\nThe walls melt into streams of green code.\nYou awaken aboard the hovercraft Nebuchadnezzar.\n\nChoose:\n  * [[The Construct]]\n  * [[Refuse The Truth]]\n",
+    "Refuse The Truth": "====== DENIAL ======\n\nThe truth is too much.\nYou demand to return.\nThe crew reluctantly complies.\n\n===== ENDING =====\n\nFALSE REALITY\n",
+    "The Construct": "====== THE CONSTRUCT ======\n\nAn endless white void surrounds you.\nTraining programs are available.\n\nChoose:\n  * [[Martial Arts Program]]\n  * [[Hacking Simulation]]\n  * [[Weapons Training]]\n",
+    "Martial Arts Program": "====== MARTIAL ARTS ======\n\nKnowledge floods your mind.\nEvery movement becomes instinct.\n'I know kung fu.'\n\nChoose:\n  * [[Agent Encounter]]\n",
+    "Hacking Simulation": "====== HACKING SIMULATION ======\n\nGreen symbols begin to make sense.\nYou can now see patterns hidden in reality.\n\nChoose:\n  * [[Agent Encounter]]\n",
+    "Weapons Training": "====== WEAPONS TRAINING ======\n\nRows of impossible weapons appear.\nHours become months of training.\nYou are ready.\n\nChoose:\n  * [[Agent Encounter]]\n",
+    "Agent Encounter": "====== AGENT ENCOUNTER ======\n\nA man in a black suit steps from the crowd.\nEveryone around him freezes.\nThe Agent smiles.\n\nChoose:\n  * [[Fight]]\n  * [[Run]]\n  * [[Hack Reality]]\n",
+    "Fight": "====== THE FIGHT ======\n\nYou attack.\nThe Agent barely moves.\nYou realise too late that strength alone is not enough.\n===== ENDING =====\n\nDEFEATED\n",
+    "Run": "====== ESCAPE ======\n\nYou sprint across rooftops.\nThe Agent follows relentlessly.\nAhead is a maintenance door.\n\nChoose:\n  * [[Enter The Oracle's Path]]\n  * [[Jump To The Train Station]]\n",
+    "Hack Reality": "====== CODE BREACH ======\n\nThe world freezes.\nYou begin rewriting fragments of reality.\nThe Agent falters.\nA hidden doorway appears.\n\nChoose:\n  * [[Enter The Oracle's Path]]\n",
+    "Jump To The Train Station": "====== TRAIN STATION ======\n\nThe station exists between worlds.\nA train approaches.\n\nChoose:\n  * [[Board The Train]]\n  * [[Stay Behind]]\n",
+    "Board The Train": "====== BETWEEN REALITIES ======\n\nThe train carries you beyond the Agent's reach.\nWhen you disembark, an old woman is waiting.\n\nChoose:\n  * [[The Oracle]]\n",
+    "Stay Behind": "====== LOST ======\n\nThe station becomes empty.\nYears seem to pass.\nYou are forgotten.\n\n===== ENDING =====\n\nTHE EXILE\n",
+    "Enter The Oracle's Path": "====== ORACLE'S HOUSE ======\n\nThe path leads to a quiet apartment.\nThe smell of baking fills the air.\n\nChoose:\n  * [[The Oracle]]\n",
+    "The Oracle": "====== THE ORACLE ======\n\nAn elderly woman smiles.\n\"I've been expecting you.\"\nShe presents a final prophecy.\nYou will face a choice.\n\nChoose:\n  * [[Machine City]]\n  * [[Return To The Matrix]]\n",
+    "Return To The Matrix": "====== FINAL TEST ======\n\nThe Oracle's words echo in your mind.\nYou are given another opportunity.\n\nChoose:\n  * [[Agent Smith]]\n",
+    "Agent Smith": "====== AGENT SMITH ======\n\nThis Agent is different.\nSomething has gone wrong.\nHe replicates endlessly.\n\nChoose:\n  * [[Fight Smith]]\n  * [[Reach The Source]]\n",
+    "Fight Smith": "====== LAST STAND ======\n\nThousands of Smiths surround you.\nThe sky darkens.\n\nChoose:\n  * [[Reach The Source]]\n",
+    "Machine City": "====== MACHINE CITY ======\n\nTowering engines stretch beyond the horizon.\nMillions of machines watch silently.\nA pathway opens.\n\nChoose:\n  * [[Reach The Source]]\n",
+    "Reach The Source": "====== THE SOURCE ======\n\nYou stand before the Architect.\nCountless screens display every choice you have made.\n\"The equation must be balanced.\"\nOne final decision remains.\n\nChoose:\n  * [[Save Humanity]]\n  * [[Restart The Matrix]]\n  * [[Become The Architect]]\n",
+    "Save Humanity": "====== THE ONE ======\n\nYou choose freedom.\nHumans and machines agree to peace.\nThe war finally ends.\n\n===== ENDING =====\n\nTHE ONE\nVictory.\n",
+    "Restart The Matrix": "====== THE LOOP ======\n\nThe system resets.\nHistory begins again.\nSomewhere another version of you awakens.\n\n===== ENDING =====\n\nRECURSION\n",
+    "Become The Architect": "====== THE ARCHITECT ======\n\nYou accept control of the Matrix.\nReality bends to your design.\nGreen code fills the horizon.\n===== ENDING =====\n\nGOD OF THE MACHINE WORLD\n"
+};
+/*DATA_END*/
+
+        let current = "Home";
+
+        function parseMarkdown(text) {
+            let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            html = html.replace(/```([\s\S]*?)```/g, (m, code) => `<pre><code>${code.trim()}</code></pre>`);
+            html = html.replace(/<code>([\s\S]*?)<\/code>/g, (m, code) => `<pre><code>${code.trim()}</code></pre>`);
+            html = html.replace(/\[\[([^\|\]]+)(?:\|([^\]]+))?\]\]/g, (m, target, label) => {
+                let page = target.trim();
+                let display = label ? label.trim() : page;
+                return `<a onclick="showPage('${page}')">${display}</a>`;
+            });
+
+            let lines = html.split('\n');
+            let result = [];
+            let listStack = [];
+            let inCode = false;
+
+            lines.forEach(line => {
+                if (line.includes('<pre>') && !line.includes('</pre>')) { inCode = true; result.push(line); return; }
+                if (inCode) { result.push(line); if (line.includes('</pre>')) inCode = false; return; }
+
+                let trimmed = line.trim();
+
+                if (/^----+$/.test(trimmed)) {
+                    closeAllLists(listStack, result);
+                    result.push('<hr>');
+                    return;
+                }
+
+                let headerMatch = line.match(/^(={2,6})\s*(.*?)\s*\1$/);
+                if (headerMatch) {
+                    closeAllLists(listStack, result);
+                    let depth = headerMatch[1].length;
+                    let level = 7 - depth;
+                    if (level < 1) level = 1;
+                    if (level > 6) level = 6;
+                    result.push(`<h${level}>${headerMatch[2]}</h${level}>`);
+                    return;
+                }
+
+                if (/^\s{2,}[^\*\-\s]/.test(line) && !trimmed.startsWith('*') && !trimmed.startsWith('-')) {
+                    closeAllLists(listStack, result);
+                    result.push(`<pre><code>${line.substring(2)}</code></pre>`);
+                    return;
+                }
+
+                let listMatch = line.match(/^(\s+)([\*\-])\s+(.*)$/);
+                if (listMatch) {
+                    let indent = listMatch[1].length;
+                    let type = listMatch[2] === '*' ? 'ul' : 'ol';
+                    let content = applyInlineFormatting(listMatch[3]);
+                    adjustListDepth(indent, type, listStack, result);
+                    result.push(`<li>${content}</li>`);
+                    return;
+                } else {
+                    closeAllLists(listStack, result);
+                }
+
+                if (trimmed === '') {
+                    result.push('<br>');
+                } else {
+                    result.push(`<p>${applyInlineFormatting(line)}</p>`);
+                }
+            });
+
+            closeAllLists(listStack, result);
+            return result.join('\n');
+        }
+
+        function adjustListDepth(indent, type, stack, result) {
+            while (stack.length > 0 && stack[stack.length - 1].indent > indent) {
+                let top = stack.pop();
+                result.push(`</${top.type}>`);
+            }
+            if (stack.length === 0 || stack[stack.length - 1].indent < indent) {
+                stack.push({ indent: indent, type: type });
+                result.push(`<${type}>`);
+            } else if (stack[stack.length - 1].type !== type) {
+                result.push(`</${stack.pop().type}>`);
+                stack.push({ indent: indent, type: type });
+                result.push(`<${type}>`);
+            }
+        }
+
+        function closeAllLists(stack, result) {
+            while (stack.length > 0) {
+                result.push(`</${stack.pop().type}>`);
+            }
+        }
+
+        function applyInlineFormatting(txt) {
+            txt = txt.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            txt = txt.replace(/\/\/([^\/]+)\/\//g, '<em>$1</em>');
+            txt = txt.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            txt = txt.replace(/''([^']+)''/g, '<code>$1</code>');
+            return txt;
+        }
+
+        function renderList() {
+            const list = document.getElementById('page-list');
+            list.innerHTML = '';
+            Object.keys(data).sort().forEach(p => {
+                const li = document.createElement('li');
+                li.textContent = p;
+                if(p === current) li.className = 'active';
+                li.onclick = () => showPage(p);
+                list.appendChild(li);
+            });
+        }
+
+        function showPage(p) {
+            current = p;
+            renderList();
+            document.getElementById('view-mode').className = '';
+            document.getElementById('edit-mode').className = 'hidden';
+            document.getElementById('page-title').textContent = p;
+            document.getElementById('page-text').innerHTML = parseMarkdown(data[p] || "This page is empty.");
+            document.getElementById('del-btn').style.display = (p === "Home") ? "none" : "inline";
+        }
+
+        function editMode() {
+            document.getElementById('view-mode').className = 'hidden';
+            document.getElementById('edit-mode').className = '';
+            document.getElementById('edit-title').value = current;
+            document.getElementById('edit-title').disabled = (current === "Home");
+            document.getElementById('edit-text').value = data[current] || "";
+        }
+
+        function cancelEdit() { showPage(current); }
+
+        function savePage() {
+            let t = document.getElementById('edit-title').value.trim();
+            if(!t) return alert("Title required");
+            if(current !== t && current !== "") delete data[current];
+            data[t] = document.getElementById('edit-text').value;
+            current = t;
+            showPage(t);
+        }
+
+        function newPage() {
+            current = "";
+            document.getElementById('view-mode').className = 'hidden';
+            document.getElementById('edit-mode').className = '';
+            document.getElementById('edit-title').value = "";
+            document.getElementById('edit-title').disabled = false;
+            document.getElementById('edit-text').value = "";
+        }
+
+        function deletePage() {
+            if(current === "Home" || !confirm("Delete this page?")) return;
+            delete data[current];
+            showPage("Home");
+        }
+
+        function downloadWiki() {
+            const docClone = document.documentElement.cloneNode(true);
+            const scripts = docClone.querySelectorAll('script');
+            let targetScript = null;
+
+            for (let script of scripts) {
+                if (script.textContent.includes('/*DATA_START*/')) {
+                    targetScript = script;
+                    break;
+                }
+            }
+
+            if (!targetScript) return alert("Error finding data block.");
+
+            const dataStr = JSON.stringify(data, null, 4);
+            let scriptContent = targetScript.textContent;
+            const regex = /(\/\*DATA_START\*\/[\s\S]*?let data = )([\s\S]*?)(\;\s*\/\*DATA_END\*\/)/;
+
+            if (regex.test(scriptContent)) {
+                scriptContent = scriptContent.replace(regex, `$1${dataStr}$3`);
+                targetScript.textContent = scriptContent;
+            } else {
+                return alert("Save failed.");
+            }
+
+            let fullHTML = "<!DOCTYPE html>\n" + docClone.outerHTML;
+            const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "floppy-wiki.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        window.onload = () => showPage("Home");
+    </script>
+
+</body></html>
