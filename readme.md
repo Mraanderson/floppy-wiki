@@ -8,5 +8,7 @@ No image upload yet.
 
 https://mraanderson.github.io/floppy-wiki/floppy-wiki.html
 
+----
 The Dokuwiki formatting edition:
+
 https://mraanderson.github.io/floppy-wiki/floppy-wiki2.html - the next level...
