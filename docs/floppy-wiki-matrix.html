@@ -193,6 +193,7 @@ let data = {
             html = html.replace(/\[\[([^\|\]]+)(?:\|([^\]]+))?\]\]/g, (m, target, label) => {
                 let page = target.trim();
                 let display = label ? label.trim() : page;
+                let safepage = page.replace(/'/g, "\\'"); //Escapes single quotesfor the initial JS
                 return `<a onclick="showPage('${page}')">${display}</a>`;
             });
 
