@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floppy Disk Wiki - Alien Edition</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Courier New", Courier, monospace;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: #000000;
+            color: #00ff00;
+        }
+        #sidebar {
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background: #050505;
+            border-right: 1px dashed #00ff00;
+            flex-shrink: 0;
+        }
+        #page-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        #page-list li {
+            padding: 12px 10px;
+            cursor: pointer;
+            border-bottom: 1px dashed #003300;
+        }
+        #page-list li.active, #page-list li:hover {
+            background: #00ff00;
+            color: #000000;
+            font-weight: bold;
+        }
+        #content {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: #000000;
+        }
+        #view-mode, #edit-mode {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        textarea, input[type="text"] {
+            background: #000000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            font-family: inherit;
+        }
+        textarea {
+            width: 100%;
+            flex-grow: 1;
+            min-height: 250px;
+            margin: 15px 0;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        input[type="text"] {
+            width: 100%;
+            font-size: 1.2rem;
+        }
+        button {
+            padding: 12px 15px;
+            border: 1px solid #00ff00;
+            font-weight: bold;
+            cursor: pointer;
+            background: #000000;
+            color: #00ff00;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-family: inherit;
+        }
+        button:hover { background: #003300; }
+        button.danger { border-color: #ff0000; color: #ff0000; }
+        button.danger:hover { background: #330000; }
+        .hidden { display: none !important; }
+        #page-text { line-height: 1.6; margin-top: 10px; flex-grow: 1; }
+        #page-text h1, #page-text h2, #page-text h3, #page-text h4, #page-text h5 {
+            margin-top: 20px; margin-bottom: 10px; color: #ffffff; text-shadow: 0 0 4px #00ff00;
+        }
+        #page-text ul, #page-text ol { padding-left: 25px; margin: 10px 0; }
+        #page-text p { margin: 10px 0; }
+        #page-text pre {
+            background: #051505;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        #page-text code { font-family: inherit; color: #aaffaa; }
+        hr { border: 0; border-top: 1px dashed #00ff00; margin: 20px 0; }
+        a { color: #ffffff; text-decoration: underline; cursor: pointer; font-weight: bold; text-shadow: 0 0 4px #00ff00; }
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; min-height: 100vh; }
+            #sidebar { width: 100%; border-right: none; border-bottom: 1px dashed #00ff00; max-height: 250px; }
+            #content { padding: 15px; }
+            textarea { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3> Floppy Wiki... ...F5 to reset</h3>
+        <ul id="page-list"></ul>
+        <button onclick="newPage()">+ New Page</button>
+        <button onclick="downloadWiki()"> Save to Floppy</button>
+    </div>
+    <div id="content">
+        <div id="view-mode" class="">
+            <h1 id="page-title"></h1>
+            <div id="page-text"><h1></h1>
+<ul>
+</ul>
+<br></div>
+            <div style="margin-top:20px;">
+                <button onclick="editMode()">Edit</button>
+                <button id="del-btn" class="danger" onclick="deletePage()" style="display: inline;">Delete</button>
+            </div>
+        </div>
+        <div id="edit-mode" class="hidden">
+            <input type="text" id="edit-title" placeholder="Page Title">
+            <textarea id="edit-text" placeholder="====== Header 1 ======\n===== Header 2 =====\n\n* Bullet item\n  * Nested bullet\n\n----\n\n[[Link|Display Text]]\n\n```\ncode block\n```"></textarea>
+            <div>
+                <button onclick="savePage()">Save</button>
+                <button onclick="cancelEdit()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+/*DATA_START*/
+let data = {
+    "Home": "====== DEEP SPACE ======\n\nYou awaken from hypersleep.\nThe ship hums quietly.\nA message blinks on the terminal:\n  \"Unscheduled transmission detected.\"\nThe crew gathers.\nA nearby moon may hold the source.\n\nChoose:\n  * [[Investigate The Signal]]\n  * [[Ignore The Signal]]\n",
+    "Investigate The Signal": "====== DERELICT ======\n\nThe surface is cold and silent.\nA massive, fossilized creature sits in a strange chair.\nA hole leads downward into darkness.\n\nChoose:\n  * [[Descend Into The Chamber]]\n  * [[Return To The Ship]]\n",
+    "Ignore The Signal": "====== COMPANY POLICY ======\n\nYou choose to ignore the transmission.\nThe ship continues toward its destination.\nBut the Company is displeased.\n\n===== ENDING =====\nNON‑COMPLIANT\nYour contract is terminated.\n",
+    "Descend Into The Chamber": "====== EGG CHAMBER ======\n\nRows of leathery objects line the floor.\nOne begins to open.\nA shape moves inside.\n\nChoose:\n  * [[Approach The Egg]]\n  * [[Retreat Carefully]]\n",
+    "Return To The Ship": "====== SAFE... FOR NOW ======\n\nYou leave the moon behind.\nThe crew debates what was seen.\nBut something feels unfinished.\n\n===== ENDING =====\nUNRESOLVED MYSTERY\n",
+    "Approach The Egg": "====== CONTACT ======\n\nA creature leaps.\nIt clamps onto your face.\nYou fall.\n\nChoose:\n  * [[Bring Them Inside]]\n",
+    "Retreat Carefully": "====== TOO LATE ======\n\nYou slip.\nAn egg opens.\nDarkness rushes toward you.\n\n===== ENDING =====\nINFECTED\n",
+    "Bring Them Inside": "====== QUARANTINE BREACH ======\n\nThe crew argues.\nThe airlock opens.\nThe creature remains attached.\nHours pass.\nIt suddenly detaches.\n\nChoose:\n  * [[Monitor The Patient]]\n  * [[Perform A Scan]]\n",
+    "Monitor The Patient": "====== RECOVERY ======\n\nThey awaken hungry.\nThe crew relaxes.\nA meal is served.\n\nChoose:\n  * [[Dinner Scene]]\n",
+    "Perform A Scan": "====== INTERNAL ANOMALY ======\n\nSomething moves inside the ribcage.\nThe crew panics.\n\nChoose:\n  * [[Emergency Surgery]]\n",
+    "Dinner Scene": "====== CHESTBURSTER ======\n\nPain.\nScreaming.\nA creature erupts.\nIt flees into the ship.\n\nChoose:\n  * [[Hunt The Creature]]\n  * [[Seal Off The Area]]\n",
+    "Emergency Surgery": "====== FATAL PROCEDURE ======\n\nThe creature reacts violently.\nThe patient dies.\nThe organism escapes.\n\nChoose:\n  * [[Hunt The Creature]]\n",
+    "Hunt The Creature": "====== DARK CORRIDORS ======\n\nThe ship is a maze.\nThe creature grows rapidly.\nIts movements are silent.\n\nChoose:\n  * [[Set A Trap]]\n  * [[Search Alone]]\n  * [[Check The Air Ducts]]\n",
+    "Seal Off The Area": "====== TOO SLOW ======\n\nThe creature is already gone.\nIt stalks the vents.\n\nChoose:\n  * [[Check The Air Ducts]]\n",
+    "Set A Trap": "====== AMBUSH ======\n\nFlamethrowers ready.\nThe creature appears.\nIt is larger than expected.\nThe trap fails.\n\n===== ENDING =====\nOVERRUN\n",
+    "Search Alone": "====== ISOLATION ======\n\nYou move quietly.\nA shadow shifts.\nA hiss behind you.\n\n===== ENDING =====\nTAKEN\n",
+    "Check The Air Ducts": "====== VENT CRAWL ======\n\nThe creature is close.\nMovement echoes.\nA junction splits the path.\n\nChoose:\n  * [[Head Toward Engineering]]\n  * [[Head Toward The Shuttle]]\n",
+    "Head Toward Engineering": "====== ENGINEERING BAY ======\n\nSteam vents hiss.\nThe creature drops from above.\n\nChoose:\n  * [[Fight With Flamethrower]]\n  * [[Escape To The Shuttle]]\n",
+    "Head Toward The Shuttle": "====== SHUTTLE BAY ======\n\nThe shuttle is ready.\nBut the creature may be aboard.\n\nChoose:\n  * [[Board The Shuttle]]\n  * [[Purge The Bay]]\n",
+    "Fight With Flamethrower": "====== CLOSE QUARTERS ======\n\nYou fire.\nThe creature screams.\nIt retreats.\nBut the flames ignite coolant lines.\n\n===== ENDING =====\nSHIP DESTROYED\n",
+    "Escape To The Shuttle": "====== FINAL ESCAPE ======\n\nYou sprint.\nThe creature follows.\nYou reach the shuttle.\n\nChoose:\n  * [[Launch]]\n",
+    "Board The Shuttle": "====== SILENT CABIN ======\n\nYou enter.\nSomething drips from the ceiling.\n\n===== ENDING =====\nAMBUSHED\n",
+    "Purge The Bay": "====== AIRLOCK PURGE ======\n\nYou trigger the purge.\nThe creature is sucked into space.\nThe ship is safe.\n\nChoose:\n  * [[Launch]]\n",
+    "Launch": "====== SURVIVOR ======\n\nYou drift through space.\nThe nightmare is over.\nFor now.\n\n===== ENDING =====\nSURVIVOR\n"
+};
+/*DATA_END*/
+
+        let current = "Home";
+
+        function parseMarkdown(text) {
+            let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            html = html.replace(/```([\s\S]*?)```/g, (m, code) => `<pre><code>${code.trim()}</code></pre>`);
+            html = html.replace(/<code>([\s\S]*?)<\/code>/g, (m, code) => `<pre><code>${code.trim()}</code></pre>`);
+            html = html.replace(/\[\[([^\|\]]+)(?:\|([^\]]+))?\]\]/g, (m, target, label) => {
+                let page = target.trim();
+                let display = label ? label.trim() : page;
+                let safepage = page.replace(/'/g, "\\'"); //Escapes single quotesfor the initial JS
+                return `<a onclick="showPage('${page}')">${display}</a>`;
+            });
+
+            let lines = html.split('\n');
+            let result = [];
+            let listStack = [];
+            let inCode = false;
+
+            lines.forEach(line => {
+                if (line.includes('<pre>') && !line.includes('</pre>')) { inCode = true; result.push(line); return; }
+                if (inCode) { result.push(line); if (line.includes('</pre>')) inCode = false; return; }
+
+                let trimmed = line.trim();
+
+                if (/^----+$/.test(trimmed)) {
+                    closeAllLists(listStack, result);
+                    result.push('<hr>');
+                    return;
+                }
+
+                let headerMatch = line.match(/^(={2,6})\s*(.*?)\s*\1$/);
+                if (headerMatch) {
+                    closeAllLists(listStack, result);
+                    let depth = headerMatch[1].length;
+                    let level = 7 - depth;
+                    if (level < 1) level = 1;
+                    if (level > 6) level = 6;
+                    result.push(`<h${level}>${headerMatch[2]}</h${level}>`);
+                    return;
+                }
+
+                if (/^\s{2,}[^\*\-\s]/.test(line) && !trimmed.startsWith('*') && !trimmed.startsWith('-')) {
+                    closeAllLists(listStack, result);
+                    result.push(`<pre><code>${line.substring(2)}</code></pre>`);
+                    return;
+                }
+
+                let listMatch = line.match(/^(\s+)([\*\-])\s+(.*)$/);
+                if (listMatch) {
+                    let indent = listMatch[1].length;
+                    let type = listMatch[2] === '*' ? 'ul' : 'ol';
+                    let content = applyInlineFormatting(listMatch[3]);
+                    adjustListDepth(indent, type, listStack, result);
+                    result.push(`<li>${content}</li>`);
+                    return;
+                } else {
+                    closeAllLists(listStack, result);
+                }
+
+                if (trimmed === '') {
+                    result.push('<br>');
+                } else {
+                    result.push(`<p>${applyInlineFormatting(line)}</p>`);
+                }
+            });
+
+            closeAllLists(listStack, result);
+            return result.join('\n');
+        }
+
+        function adjustListDepth(indent, type, stack, result) {
+            while (stack.length > 0 && stack[stack.length - 1].indent > indent) {
+                let top = stack.pop();
+                result.push(`</${top.type}>`);
+            }
+            if (stack.length === 0 || stack[stack.length - 1].indent < indent) {
+                stack.push({ indent: indent, type: type });
+                result.push(`<${type}>`);
+            } else if (stack[stack.length - 1].type !== type) {
+                result.push(`</${stack.pop().type}>`);
+                stack.push({ indent: indent, type: type });
+                result.push(`<${type}>`);
+            }
+        }
+
+        function closeAllLists(stack, result) {
+            while (stack.length > 0) {
+                result.push(`</${stack.pop().type}>`);
+            }
+        }
+
+        function applyInlineFormatting(txt) {
+            txt = txt.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            txt = txt.replace(/\/\/([^\/]+)\/\//g, '<em>$1</em>');
+            txt = txt.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            txt = txt.replace(/''([^']+)''/g, '<code>$1</code>');
+            return txt;
+        }
+
+        function renderList() {
+            const list = document.getElementById('page-list');
+            list.innerHTML = '';
+            Object.keys(data).sort().forEach(p => {
+                const li = document.createElement('li');
+                li.textContent = p;
+                if(p === current) li.className = 'active';
+                li.onclick = () => showPage(p);
+                list.appendChild(li);
+            });
+        }
+
+        function showPage(p) {
+            current = p;
+            renderList();
+            document.getElementById('view-mode').className = '';
+            document.getElementById('edit-mode').className = 'hidden';
+            document.getElementById('page-title').textContent = p;
+            document.getElementById('page-text').innerHTML = parseMarkdown(data[p] || "This page is empty.");
+            document.getElementById('del-btn').style.display = (p === "Home") ? "none" : "inline";
+        }
+
+        function editMode() {
+            document.getElementById('view-mode').className = 'hidden';
+            document.getElementById('edit-mode').className = '';
+            document.getElementById('edit-title').value = current;
+            document.getElementById('edit-title').disabled = (current === "Home");
+            document.getElementById('edit-text').value = data[current] || "";
+        }
+
+        function cancelEdit() { showPage(current); }
+
+        function savePage() {
+            let t = document.getElementById('edit-title').value.trim();
+            if(!t) return alert("Title required");
+            if(current !== t && current !== "") delete data[current];
+            data[t] = document.getElementById('edit-text').value;
+            current = t;
+            showPage(t);
+        }
+
+        function newPage() {
+            current = "";
+            document.getElementById('view-mode').className = 'hidden';
+            document.getElementById('edit-mode').className = '';
+            document.getElementById('edit-title').value = "";
+            document.getElementById('edit-title').disabled = false;
+            document.getElementById('edit-text').value = "";
+        }
+
+        function deletePage() {
+            if(current === "Home" || !confirm("Delete this page?")) return;
+            delete data[current];
+            showPage("Home");
+        }
+
+        function downloadWiki() {
+            const docClone = document.documentElement.cloneNode(true);
+            const scripts = docClone.querySelectorAll('script');
+            let targetScript = null;
+
+            for (let script of scripts) {
+                if (script.textContent.includes('/*DATA_START*/')) {
+                    targetScript = script;
+                    break;
+                }
+            }
+
+            if (!targetScript) return alert("Error finding data block.");
+
+            const dataStr = JSON.stringify(data, null, 4);
+            let scriptContent = targetScript.textContent;
+            const regex = /(\/\*DATA_START\*\/[\s\S]*?let data = )([\s\S]*?)(\;\s*\/\*DATA_END\*\/)/;
+
+            if (regex.test(scriptContent)) {
+                scriptContent = scriptContent.replace(regex, `$1${dataStr}$3`);
+                targetScript.textContent = scriptContent;
+            } else {
+                return alert("Save failed.");
+            }
+
+            let fullHTML = "<!DOCTYPE html>\n" + docClone.outerHTML;
+            const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "floppy-wiki.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        window.onload = () => showPage("Home");
+    </script>
+
+</body></html>
