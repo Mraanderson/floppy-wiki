@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floppy Disk Wiki - Matrix Edition</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Courier New", Courier, monospace;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: #000000;
+            color: #00ff00;
+        }
+        #sidebar {
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background: #050505;
+            border-right: 1px dashed #00ff00;
+            flex-shrink: 0;
+        }
+        #page-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        #page-list li {
+            padding: 12px 10px;
+            cursor: pointer;
+            border-bottom: 1px dashed #003300;
+        }
+        #page-list li.active, #page-list li:hover {
+            background: #00ff00;
+            color: #000000;
+            font-weight: bold;
+        }
+        #content {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: #000000;
+        }
+        #view-mode, #edit-mode {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        textarea, input[type="text"] {
+            background: #000000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            font-family: inherit;
+        }
+        textarea {
+            width: 100%;
+            flex-grow: 1;
+            min-height: 250px;
+            margin: 15px 0;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        input[type="text"] {
+            width: 100%;
+            font-size: 1.2rem;
+        }
+        button {
+            padding: 12px 15px;
+            border: 1px solid #00ff00;
+            font-weight: bold;
+            cursor: pointer;
+            background: #000000;
+            color: #00ff00;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-family: inherit;
+        }
+        button:hover { background: #003300; }
+        button.danger { border-color: #ff0000; color: #ff0000; }
+        button.danger:hover { background: #330000; }
+        .hidden { display: none !important; }
+        #page-text { line-height: 1.6; margin-top: 10px; flex-grow: 1; }
+        #page-text h1, #page-text h2, #page-text h3, #page-text h4, #page-text h5 {
+            margin-top: 20px; margin-bottom: 10px; color: #ffffff; text-shadow: 0 0 4px #00ff00;
+        }
+        #page-text ul, #page-text ol { padding-left: 25px; margin: 10px 0; }
+        #page-text p { margin: 10px 0; }
+        #page-text pre {
+            background: #051505;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        #page-text code { font-family: inherit; color: #aaffaa; }
+        hr { border: 0; border-top: 1px dashed #00ff00; margin: 20px 0; }
+        a { color: #ffffff; text-decoration: underline; cursor: pointer; font-weight: bold; text-shadow: 0 0 4px #00ff00; }
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; min-height: 100vh; }
+            #sidebar { width: 100%; border-right: none; border-bottom: 1px dashed #00ff00; max-height: 250px; }
+            #content { padding: 15px; }
+            textarea { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3> Floppy Wiki</h3>
+        <ul id="page-list"><li>Another Page</li><li>Format test</li><li>Home</li><li class="active">Label ideas</li></ul>
+        <button onclick="newPage()">+ New Page</button>
+        <button onclick="downloadWiki()"> Save to Floppy</button>
+    </div>
+    <div id="content">
+        <div id="view-mode" class="">
+            <h1 id="page-title">Label ideas</h1>
+            <div id="page-text"><pre><pre><code>+--------------------------+
+| FLOPPY-WIKI  [A:\DRIVE]  |
++--------------------------+
+| PAGE: Knock Knock Neo    |
+| DATE: 2026-09-08         |
++--------------------------+
+| * Follow white rabbit.   |
+| * Check data block.      |
+| * Save back to A:\       |
++--------------------------+</code></pre></pre>
+<pre><pre><code>+---+  FLOPPY-WIKI
+|[_]|  --------------------
++---+  TITLE: Home Page
+===========================
+* DokuWiki Syntax Active
+* Matrix Green Theme
+* Offline Single-File HTML
+---------------------------
+ID: 1.44MB-SYS-01</code></pre></pre>
+<pre><pre><code>============================
+  FLOPPY-WIKI :: READ-ONLY  
+============================
+TITLE : Matrix Wiki
+OWNER : Neo
+UPDATED: 2026-09-08
+----------------------------
+CONTENTS:
+ [x] Home / Index
+ [x] System Rules
+ [ ] Unsaved Data
+============================</code></pre></pre>
+<pre><pre><code>============================
+   SYSTEM TRAINING MANUAL   
+============================
+[SIDE A] :: TAPE LESSON 01
+SUBJECT : Floppy-Wiki Usage
+VOL/ID  : VOL-01 / 1.44MB
+----------------------------
+INSTRUCTIONS:
+ 01. Insert disk into drive
+ 02. Double-click HTML file
+ 03. Read &amp; follow on-screen
+ 04. Save back to drive A:\
+----------------------------
+   PRESS PLAY TO BEGIN...   
+============================</code></pre></pre>
+<pre><pre><code>+--------------------------+
+|  AUDIO-GUIDE TRAINING    |
+|  VOL.1 : FLOPPY WIKI     |
++--------------------------+
+|  SIDE A  |  TRK: 01/01   |
++--------------------------+
+| 1. LOAD  :: Open A:\HTML |
+| 2. READ  :: Follow notes |
+| 3. SAVE  :: Overwrite A: |
++--------------------------+</code></pre></pre></div>
+            <div style="margin-top:20px;">
+                <button onclick="editMode()">Edit</button>
+                <button id="del-btn" class="danger" onclick="deletePage()" style="display: inline;">Delete</button>
+            </div>
+        </div>
+        <div id="edit-mode" class="hidden">
+            <input type="text" id="edit-title" placeholder="Page Title">
+            <textarea id="edit-text" placeholder="====== Header 1 ======\n===== Header 2 =====\n\n* Bullet item\n  * Nested bullet\n\n----\n\n[[Link|Display Text]]\n\n```\ncode block\n```"></textarea>
+            <div>
+                <button onclick="savePage()">Save</button>
+                <button onclick="cancelEdit()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*DATA_START*/
+        let data = {
+    "Home": "====== Welcome to Floppy Wiki ======\n\nThis wiki uses **DokuWiki syntax** and fits on a floppy disk or Android download folder.\n\n===== Formatting Rules =====\n* ====== Top Header ======\n* ===== Section Header =====\n* ==== Subsection ====\n* Indented bullets:\n  * Nested item 1\n  * Nested item 2\n* Code blocks using ```\n* Horizontal line using ----\n* Page link: [[Another Page|Go To Another Page]]",
+    "Another Page": "====== Connected Page ======\n\nThis page was loaded from internal storage.\n\nReturn to [[Home]].",
+    "Format test": "======heading 6======\n=====heading 5=====\n====heading 4====\n===heading 3===\n==heading 2==\n\n* Bullet\n * Nested 1\n  * Nested 2\n  * Another\n * Back out\n* Main list\n----\n```\nGrave accent block\n```\n**Bold**\nNot bold\n  Double space code block",
+    "Label ideas": "```\n+--------------------------+\n| FLOPPY-WIKI  [A:\\DRIVE]  |\n+--------------------------+\n| PAGE: Knock Knock Neo    |\n| DATE: 2026-09-08         |\n+--------------------------+\n| * Follow white rabbit.   |\n| * Check data block.      |\n| * Save back to A:\\       |\n+--------------------------+\n```\n```\n+---+  FLOPPY-WIKI\n|[_]|  --------------------\n+---+  TITLE: Home Page\n===========================\n* DokuWiki Syntax Active\n* Matrix Green Theme\n* Offline Single-File HTML\n---------------------------\nID: 1.44MB-SYS-01\n```\n```\n============================\n  FLOPPY-WIKI :: READ-ONLY  \n============================\nTITLE : Matrix Wiki\nOWNER : Neo\nUPDATED: 2026-09-08\n----------------------------\nCONTENTS:\n [x] Home / Index\n [x] System Rules\n [ ] Unsaved Data\n============================\n```\n```\n============================\n   SYSTEM TRAINING MANUAL   \n============================\n[SIDE A] :: TAPE LESSON 01\nSUBJECT : Floppy-Wiki Usage\nVOL/ID  : VOL-01 / 1.44MB\n----------------------------\nINSTRUCTIONS:\n 01. Insert disk into drive\n 02. Double-click HTML file\n 03. Read & follow on-screen\n 04. Save back to drive A:\\\n----------------------------\n   PRESS PLAY TO BEGIN...   \n============================\n```\n```\n+--------------------------+\n|  AUDIO-GUIDE TRAINING    |\n|  VOL.1 : FLOPPY WIKI     |\n+--------------------------+\n|  SIDE A  |  TRK: 01/01   |\n+--------------------------+\n| 1. LOAD  :: Open A:\\HTML |\n| 2. READ  :: Follow notes |\n| 3. SAVE  :: Overwrite A: |\n+--------------------------+\n```"
+};
+        /*DATA_END*/
+
+        let current = "Home";
+
+        function parseMarkdown(text) {
+            let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            html = html.replace(/```([\s\S]*?)```/g, (m, code) => `<pre><code>${code.trim()}</code></pre>`);
+            html = html.replace(/<code>([\s\S]*?)<\/code>/g, (m, code) => `<pre><code>${code.trim()}</code></pre>`);
+            html = html.replace(/\[\[([^\|\]]+)(?:\|([^\]]+))?\]\]/g, (m, target, label) => {
+                let page = target.trim();
+                let display = label ? label.trim() : page;
+                return `<a onclick="showPage('${page}')">${display}</a>`;
+            });
+
+            let lines = html.split('\n');
+            let result = [];
+            let listStack = [];
+            let inCode = false;
+
+            lines.forEach(line => {
+                if (line.includes('<pre>') && !line.includes('</pre>')) { inCode = true; result.push(line); return; }
+                if (inCode) { result.push(line); if (line.includes('</pre>')) inCode = false; return; }
+
+                let trimmed = line.trim();
+
+                if (/^----+$/.test(trimmed)) {
+                    closeAllLists(listStack, result);
+                    result.push('<hr>');
+                    return;
+                }
+
+                let headerMatch = line.match(/^(={2,6})\s*(.*?)\s*\1$/);
+                if (headerMatch) {
+                    closeAllLists(listStack, result);
+                    let depth = headerMatch[1].length;
+                    let level = 7 - depth;
+                    if (level < 1) level = 1;
+                    if (level > 6) level = 6;
+                    result.push(`<h${level}>${headerMatch[2]}</h${level}>`);
+                    return;
+                }
+
+                if (/^\s{2,}[^\*\-\s]/.test(line) && !trimmed.startsWith('*') && !trimmed.startsWith('-')) {
+                    closeAllLists(listStack, result);
+                    result.push(`<pre><code>${line.substring(2)}</code></pre>`);
+                    return;
+                }
+
+                let listMatch = line.match(/^(\s+)([\*\-])\s+(.*)$/);
+                if (listMatch) {
+                    let indent = listMatch[1].length;
+                    let type = listMatch[2] === '*' ? 'ul' : 'ol';
+                    let content = applyInlineFormatting(listMatch[3]);
+                    adjustListDepth(indent, type, listStack, result);
+                    result.push(`<li>${content}</li>`);
+                    return;
+                } else {
+                    closeAllLists(listStack, result);
+                }
+
+                if (trimmed === '') {
+                    result.push('<br>');
+                } else {
+                    result.push(`<p>${applyInlineFormatting(line)}</p>`);
+                }
+            });
+
+            closeAllLists(listStack, result);
+            return result.join('\n');
+        }
+
+        function adjustListDepth(indent, type, stack, result) {
+            while (stack.length > 0 && stack[stack.length - 1].indent > indent) {
+                let top = stack.pop();
+                result.push(`</${top.type}>`);
+            }
+            if (stack.length === 0 || stack[stack.length - 1].indent < indent) {
+                stack.push({ indent: indent, type: type });
+                result.push(`<${type}>`);
+            } else if (stack[stack.length - 1].type !== type) {
+                result.push(`</${stack.pop().type}>`);
+                stack.push({ indent: indent, type: type });
+                result.push(`<${type}>`);
+            }
+        }
+
+        function closeAllLists(stack, result) {
+            while (stack.length > 0) {
+                result.push(`</${stack.pop().type}>`);
+            }
+        }
+
+        function applyInlineFormatting(txt) {
+            txt = txt.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            txt = txt.replace(/\/\/([^\/]+)\/\//g, '<em>$1</em>');
+            txt = txt.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            txt = txt.replace(/''([^']+)''/g, '<code>$1</code>');
+            return txt;
+        }
+
+        function renderList() {
+            const list = document.getElementById('page-list');
+            list.innerHTML = '';
+            Object.keys(data).sort().forEach(p => {
+                const li = document.createElement('li');
+                li.textContent = p;
+                if(p === current) li.className = 'active';
+                li.onclick = () => showPage(p);
+                list.appendChild(li);
+            });
+        }
+
+        function showPage(p) {
+            current = p;
+            renderList();
+            document.getElementById('view-mode').className = '';
+            document.getElementById('edit-mode').className = 'hidden';
+            document.getElementById('page-title').textContent = p;
+            document.getElementById('page-text').innerHTML = parseMarkdown(data[p] || "This page is empty.");
+            document.getElementById('del-btn').style.display = (p === "Home") ? "none" : "inline";
+        }
+
+        function editMode() {
+            document.getElementById('view-mode').className = 'hidden';
+            document.getElementById('edit-mode').className = '';
+            document.getElementById('edit-title').value = current;
+            document.getElementById('edit-title').disabled = (current === "Home");
+            document.getElementById('edit-text').value = data[current] || "";
+        }
+
+        function cancelEdit() { showPage(current); }
+
+        function savePage() {
+            let t = document.getElementById('edit-title').value.trim();
+            if(!t) return alert("Title required");
+            if(current !== t && current !== "") delete data[current];
+            data[t] = document.getElementById('edit-text').value;
+            current = t;
+            showPage(t);
+        }
+
+        function newPage() {
+            current = "";
+            document.getElementById('view-mode').className = 'hidden';
+            document.getElementById('edit-mode').className = '';
+            document.getElementById('edit-title').value = "";
+            document.getElementById('edit-title').disabled = false;
+            document.getElementById('edit-text').value = "";
+        }
+
+        function deletePage() {
+            if(current === "Home" || !confirm("Delete this page?")) return;
+            delete data[current];
+            showPage("Home");
+        }
+
+        function downloadWiki() {
+            const docClone = document.documentElement.cloneNode(true);
+            const scripts = docClone.querySelectorAll('script');
+            let targetScript = null;
+
+            for (let script of scripts) {
+                if (script.textContent.includes('/*DATA_START*/')) {
+                    targetScript = script;
+                    break;
+                }
+            }
+
+            if (!targetScript) return alert("Error finding data block.");
+
+            const dataStr = JSON.stringify(data, null, 4);
+            let scriptContent = targetScript.textContent;
+            const regex = /(\/\*DATA_START\*\/[\s\S]*?let data = )([\s\S]*?)(\;\s*\/\*DATA_END\*\/)/;
+
+            if (regex.test(scriptContent)) {
+                scriptContent = scriptContent.replace(regex, `$1${dataStr}$3`);
+                targetScript.textContent = scriptContent;
+            } else {
+                return alert("Save failed.");
+            }
+
+            let fullHTML = "<!DOCTYPE html>\n" + docClone.outerHTML;
+            const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "floppy-wiki.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        window.onload = () => showPage("Home");
+    </script>
+
+</body></html>
